@@ -1,72 +1,73 @@
 #include <stdio.h>
-#define MAX 5
 
-int queue[MAX];
-int front = -1;
-int rear = -1;
+int main() {
+    int array[10];
+    int i, m;
+    int rear = -1, front = -1;
 
-int isFull() {
-    return rear == MAX - 1;
-}
+    printf("Enter the number of elements (max 5): ");
+    scanf("%d", &m);
 
-int isEmpty() {
-    return front == -1 || front > rear;
-}
+    if (m < 0 || m > 5) {
+        printf("Invalid number of elements!\n");
+        return 1;
+    }
 
-void enqueue(int value) {
-    if (isFull()) {
-        printf("Queue is full. Cannot enqueue %d\n", value);
-    } else {
-        if (front == -1) front = 0;
+    printf("Enter the elements of the array:\n");
+    for (i = 0; i < m; i++) {
+        scanf("%d", &array[i]);
+    }
+
+    if (m == 0) {
+        front = -1;
+        rear = -1;
+    } 
+    else {
+        front = 0;
+        rear = m - 1;
+    }
+
+    if (rear == 4) {
+        printf("Overflow: Queue is full, cannot enqueue.\n");
+    } 
+    else {
         rear++;
-        queue[rear] = value;
-        printf("Enqueued: %d\n", value);
-    }
-}
+        int item;
+        printf("Enter the item to be added: ");
+        scanf("%d", &item);
+        array[rear] = item;
 
-
-int dequeue() {
-    if (isEmpty()) {
-        printf("Queue is empty. Cannot dequeue\n");
-        return -1;
-    } else {
-        int val = queue[front];
-        front++;
-        if (front > rear) {
-            
-            front = rear = -1;
-        }
-        return val;
-    }
-}
-
-
-void display() {
-    if (isEmpty()) {
-        printf("Queue is empty!\n");
-    } else {
-        printf("Queue elements: ");
-        for (int i = front; i <= rear; i++) {
-            printf("%d ", queue[i]);
+        printf("Queue after enqueue:\n");
+        for (i = front; i <= rear; i++) {
+            printf("%d ", array[i]);
         }
         printf("\n");
     }
-}
 
-int main() {
-    enqueue(10);
-    enqueue(20);
-    enqueue(30);
-    display();
+    if (front == -1 || front > rear) {
+        printf("Underflow: Queue is empty, cannot dequeue.\n");
+    } 
+    else {
+        int item = array[front];
+        printf("Deleted item is: %d\n", item);
+        front++;
+        if (front > rear) {
+            front = -1;
+            rear = -1;
+        }
 
-    printf("Dequeued: %d\n", dequeue());
-    display();
-
-    enqueue(40);
-    enqueue(50);
-    enqueue(60);  
-    display();
+        if (front != -1) {
+            printf("Queue after dequeue:\n");
+            for (i = front; i <= rear; i++) {
+                printf("%d ", array[i]);
+            }
+            printf("\n");
+        } else {
+            printf("Queue is now empty.\n");
+        }
+    }
 
     return 0;
 }
+
 
