@@ -1,89 +1,79 @@
 #include <stdio.h>
 
-#define MAX_SIZE 100 
- 
-void addSparseMatrices(int matA[][3], int matB[][3], int result[][3], int sizeA, int sizeB) {
+#define MAX 100
+
+typedef struct {
+    int row, col, value;
+} term;
+
+typedef struct {
+    term data[MAX];
+    int rows, cols, terms;
+} sparse_matrix;
+
+// Function to add two sparse matrices
+sparse_matrix add_sparse(sparse_matrix a, sparse_matrix b) {
+    sparse_matrix sum;
     int i = 0, j = 0, k = 0;
 
-   
-    while (i < sizeA && j < sizeB) {
-    
-        if (matA[i][0] < matB[j][0] || (matA[i][0] == matB[j][0] && matA[i][1] < matB[j][1])) {
-            result[k][0] = matA[i][0];
-            result[k][1] = matA[i][1];
-            result[k][2] = matA[i][2];
-            i++;
-        } else if (matB[j][0] < matA[i][0] || (matB[j][0] == matA[i][0] && matB[j][1] < matA[i][1])) {
-            result[k][0] = matB[j][0];
-            result[k][1] = matB[j][1];
-            result[k][2] = matB[j][2];
-            j++;
+    sum.rows = a.rows;
+    sum.cols = a.cols;
+    sum.terms = 0;
+
+    while (i < a.terms && j < b.terms) {
+        if (a.data[i].row < b.data[j].row ||
+            (a.data[i].row == b.data[j].row && a.data[i].col < b.data[j].col)) {
+            sum.data[k++] = a.data[i++];
+        } else if (a.data[i].row > b.data[j].row ||
+            (a.data[i].row == b.data[j].row && a.data[i].col > b.data[j].col)) {
+            sum.data[k++] = b.data[j++];
         } else {
-          
-            result[k][0] = matA[i][0];
-            result[k][1] = matA[i][1];
-            result[k][2] = matA[i][2] + matB[j][2];
-            i++;
-            j++;
+            // Same position
+            sum.data[k] = a.data[i];
+            sum.data[k].value += b.data[j].value;
+            i++; j++; k++;
         }
-        k++;
     }
+    while (i < a.terms) sum.data[k++] = a.data[i++];
+    while (j < b.terms) sum.data[k++] = b.data[j++];
 
-  
-    while (i < sizeA) {
-        result[k][0] = matA[i][0];
-        result[k][1] = matA[i][1];
-        result[k][2] = matA[i][2];
-        i++;
-        k++;
-    }
-
-   
-    while (j < sizeB) {
-        result[k][0] = matB[j][0];
-        result[k][1] = matB[j][1];
-        result[k][2] = matB[j][2];
-        j++;
-        k++;
-    }
+    sum.terms = k;
+    return sum;
 }
 
-int main() {
-    int matA[MAX_SIZE][3], matB[MAX_SIZE][3], result[MAX_SIZE][3];
-    int sizeA, sizeB;
+// Function to transpose a sparse matrix
+sparse_matrix transpose_sparse(sparse_matrix m) {
+    sparse_matrix trans;
+    trans.rows = m.cols;
+    trans.cols = m.rows;
+    trans.terms = m.terms;
 
-   
-    printf("Enter the number of non-zero elements in Matrix A: ");
-    scanf("%d", &sizeA);
-
-    printf("Enter the row, column and value for each non-zero element of Matrix A:\n");
-    for (int i = 0; i < sizeA; i++) {
-        printf("Element %d: ", i + 1);
-        scanf("%d %d %d", &matA[i][0], &matA[i][1], &matA[i][2]);
-    }
-
- 
-    printf("Enter the number of non-zero elements in Matrix B: ");
-    scanf("%d", &sizeB);
-
-    printf("Enter the row, column and value for each non-zero element of Matrix B:\n");
-    for (int i = 0; i < sizeB; i++) {
-        printf("Element %d: ", i + 1);
-        scanf("%d %d %d", &matB[i][0], &matB[i][1], &matB[i][2]);
-    }
-
- 
-    addSparseMatrices(matA, matB, result, sizeA, sizeB);
-
-   
-    printf("Resulting Sparse Matrix:\n");
-    for (int i = 0; i < sizeA + sizeB; i++) {
-        if (result[i][2] != 0) {
-            printf("Row: %d, Col: %d, Value: %d\n", result[i][0], result[i][1], result[i][2]);
+    int k = 0;
+    for (int col = 0; col < m.cols; col++) {
+        for (int i = 0; i < m.terms; i++) {
+            if (m.data[i].col == col) {
+                trans.data[k].row = m.data[i].col;
+                trans.data[k].col = m.data[i].row;
+                trans.data[k].value = m.data[i].value;
+                k++;
+            }
         }
     }
+    return trans;
+}
 
+// Example usage
+int main() {
+    sparse_matrix a, b, sum, trans;
+    // Fill a and b with your matrix data here
+
+    sum = add_sparse(a, b);
+    trans = transpose_sparse(sum);
+
+    // Print the transposed result
+    printf("Row\tCol\tValue\n");
+    for (int i = 0; i < trans.terms; i++) {
+        printf("%d\t%d\t%d\n", trans.data[i].row, trans.data[i].col, trans.data[i].value);
+    }
     return 0;
 }
-
-
